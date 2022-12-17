@@ -1,0 +1,81 @@
+c[?7l[2J[0mSeaBIOS (version 1.13.0-1ubuntu1.1)
+
+
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07F8CA10+07ECCA10 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..(THU.CST) os is loading ...
+
+Special kernel symbols:
+  entry  0xc0100036 (phys)
+  etext  0xc01061d2 (phys)
+  edata  0xc011c000 (phys)
+  end    0xc011cf28 (phys)
+Kernel executable memory footprint: 116KB
+ebp:0xc0118f38 eip:0xc0100ae9 
+args: 0xc0118f40 0xc0118f44 0xc0118f48 0xc0118f4c 
+    kern/debug/kdebug.c:319: print_stackframe+25
+ebp:0xc0118f48 eip:0xc0100dfc 
+args: 0xc0118f50 0xc0118f54 0xc0118f58 0xc0118f5c 
+    kern/debug/kmonitor.c:129: mon_backtrace+14
+ebp:0xc0118f68 eip:0xc01000cc 
+args: 0xc0118f70 0xc0118f74 0xc0118f78 0xc0118f7c 
+    kern/init/init.c:49: grade_backtrace2+37
+ebp:0xc0118f88 eip:0xc01000fa 
+args: 0xc0118f90 0xc0118f94 0xc0118f98 0xc0118f9c 
+    kern/init/init.c:54: grade_backtrace1+42
+ebp:0xc0118fa8 eip:0xc010011d 
+args: 0xc0118fb0 0xc0118fb4 0xc0118fb8 0xc0118fbc 
+    kern/init/init.c:59: grade_backtrace0+27
+ebp:0xc0118fc8 eip:0xc0100147 
+args: 0xc0118fd0 0xc0118fd4 0xc0118fd8 0xc0118fdc 
+    kern/init/init.c:64: grade_backtrace+38
+ebp:0xc0118ff8 eip:0xc010008b 
+args: 0xc0119000 0xc0119004 0xc0119008 0xc011900c 
+    kern/init/init.c:29: kern_init+84
+memory management: default_pmm_manager
+e820map:
+  memory: 0009fc00, [00000000, 0009fbff], type = 1.
+  memory: 00000400, [0009fc00, 0009ffff], type = 2.
+  memory: 00010000, [000f0000, 000fffff], type = 2.
+  memory: 07ee0000, [00100000, 07fdffff], type = 1.
+  memory: 00020000, [07fe0000, 07ffffff], type = 2.
+  memory: 00040000, [fffc0000, ffffffff], type = 2.
+check_alloc_page() succeeded!
+check_pgdir() succeeded!
+check_boot_pgdir() succeeded!
+-------------------- BEGIN --------------------
+PDE(0e0) c0000000-f8000000 38000000 urw
+  |-- PTE(38000) c0000000-f8000000 38000000 -rw
+PDE(001) fac00000-fb000000 00400000 -rw
+  |-- PTE(000e0) faf00000-fafe0000 000e0000 urw
+  |-- PTE(00001) fafeb000-fafec000 00001000 -rw
+--------------------- END ---------------------
+++ setup timer interrupts
+100 ticks
+End of Test.
+kernel panic at kern/trap/trap.c:18:
+    EOT: kernel seems ok.
+stack trackback:
+ebp:0xc0118ee0 eip:0xc0100ae9 
+args: 0xc0118ee8 0xc0118eec 0xc0118ef0 0xc0118ef4 
+    kern/debug/kdebug.c:319: print_stackframe+25
+ebp:0xc0118f10 eip:0xc0100492 
+args: 0xc0118f18 0xc0118f1c 0xc0118f20 0xc0118f24 
+    kern/debug/panic.c:27: __panic+107
+ebp:0xc0118f30 eip:0xc01019e1 
+args: 0xc0118f38 0xc0118f3c 0xc0118f40 0xc0118f44 
+    kern/trap/trap.c:0: print_ticks+69
+ebp:0xc0118f60 eip:0xc0101e90 
+args: 0xc0118f68 0xc0118f6c 0xc0118f70 0xc0118f74 
+    kern/trap/trap.c:176: trap_dispatch+120
+ebp:0xc0118f80 eip:0xc0101f4e 
+args: 0xc0118f88 0xc0118f8c 0xc0118f90 0xc0118f94 
+    kern/trap/trap.c:213: trap+20
+ebp:0xc0118ff8 eip:0xc01029d9 
+args: 0xc0119000 0xc0119004 0xc0119008 0xc011900c 
+    kern/trap/trapentry.S:24: <unknown>+0
+Welcome to the kernel debug monitor!!
+Type 'help' for a list of commands.
+K> 
