@@ -111,6 +111,7 @@ alloc_proc(void) {
         //不需要释放CPU，因为还没有分配
         proc->need_resched = 0; 
         proc->parent = NULL;
+        //内核线程用不到mm
         proc->mm = NULL; 
         //将context变量中的所有成员变量置为0
         memset(&(proc->context), 0, sizeof(struct context));
