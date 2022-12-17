@@ -186,16 +186,23 @@ get_pid(void) {
 // NOTE: before call switch_to, should load  base addr of "proc"'s new PDT
 void
 proc_run(struct proc_struct *proc) {
+    //判断要调度的进程是不是当前进程
     if (proc != current) {
-        bool intr_flag;
+        bool intr_flag;//定义中断变量
         struct proc_struct *prev = current, *next = proc;
+        //关闭中断
         local_intr_save(intr_flag);
         {
+            //当前进程设为待调度的进程
             current = proc;
+            //加载待调度进程的内核栈基地址
             load_esp0(next->kstack + KSTACKSIZE);
+            //将当前的cr3寄存器改为需要运行进程的页目录表
             lcr3(next->cr3);
+            //进行上下文切换，保存原线程的寄存器并恢复待调度线程的寄存器
             switch_to(&(prev->context), &(next->context));
         }
+        //恢复中断
         local_intr_restore(intr_flag);
     }
 }
