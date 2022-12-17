@@ -141,8 +141,10 @@ get_proc_name(struct proc_struct *proc) {
 }
 
 // get_pid - alloc a unique pid for process
+//get_id将为每个调用fock的线程返回不同的id
 static int
 get_pid(void) {
+    //ID的总数目是大于PROCESS的总数目的
     static_assert(MAX_PID > MAX_PROCESS);
     struct proc_struct *proc;
     list_entry_t *list = &proc_list, *le;
@@ -155,8 +157,13 @@ get_pid(void) {
     inside:
         next_safe = MAX_PID;
     repeat:
+        //le等于线程的链表头
         le = list;
+        //循环扫描每一个当前进程：当一个现有的进程号和last_pid相等时，则将last_pid+1
         while ((le = list_next(le)) != list) {
+            //如果proc的pid与last_pid相等，则将last_pid加1
+            //当然，如果last_pid>=MAX_PID,then 将其变为1
+            //确保了没有一个进程的pid与last_pid重合
             proc = le2proc(le, list_link);
             if (proc->pid == last_pid) {
                 if (++ last_pid >= next_safe) {
