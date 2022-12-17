@@ -102,17 +102,23 @@ alloc_proc(void) {
      *       uint32_t flags;                             // Process flag
      *       char name[PROC_NAME_LEN + 1];               // Process name
      */
-        proc->state = PROC_UNINIT;
-        proc->pid = -1;
-        proc->runs = 0;
-        proc->kstack = 0;
-        proc->need_resched = 0;
+        //没有分配物理页，将线程状态初始为初始状态
+        proc->state = PROC_UNINIT; 
+        proc->pid = -1; 
+        proc->runs = 0; 
+        //内核栈位置，暂未分配，初始化为0
+        proc->kstack = 0; 
+        //不需要释放CPU，因为还没有分配
+        proc->need_resched = 0; 
         proc->parent = NULL;
-        proc->mm = NULL;
+        proc->mm = NULL; 
+        //将context变量中的所有成员变量置为0
         memset(&(proc->context), 0, sizeof(struct context));
         proc->tf = NULL;
-        proc->cr3 = boot_cr3;
+        //内核线程，默认初始化为boot_cr3
+        proc->cr3 = boot_cr3; 
         proc->flags = 0;
+        //内核线程的名称初始化为空
         memset(proc->name, 0, PROC_NAME_LEN);
     }
     return proc;
