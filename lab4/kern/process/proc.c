@@ -111,6 +111,7 @@ alloc_proc(void) {
         //不需要释放CPU，因为还没有分配
         proc->need_resched = 0; 
         proc->parent = NULL;
+        //mm，当前进程所管理的虚拟内存页，包括其所属的页目录项PDT
         //内核线程用不到mm
         proc->mm = NULL; 
         //将context变量中的所有成员变量置为0

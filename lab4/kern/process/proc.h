@@ -22,6 +22,7 @@ enum proc_state {
 // which are caller save, but not the return register %eax.
 // (Not saving %eax just simplifies the switching code.)
 // The layout of context must match code in switch.S.
+// 保存的上下文寄存器，注意没有eax寄存器和段寄存器
 struct context {
     uint32_t eip;
     uint32_t esp;
