@@ -185,6 +185,8 @@ get_pid(void) {
 
 // proc_run - make process "proc" running on cpu
 // NOTE: before call switch_to, should load  base addr of "proc"'s new PDT
+//proc_run函数会设置TSS中ring0的内核栈地址，
+//同时还会加载页目录表的地址。等到这些前置操作完成后，最后执行上下文切换
 void
 proc_run(struct proc_struct *proc) {
     //判断要调度的进程是不是当前进程
