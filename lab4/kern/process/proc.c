@@ -405,10 +405,11 @@ proc_init(void) {
     if ((idleproc = alloc_proc()) == NULL) {
         panic("cannot alloc idleproc.\n");
     }
-
+    //// 该空闲进程作为第一个进程，pid为0
     idleproc->pid = 0;
     idleproc->state = PROC_RUNNABLE;
     idleproc->kstack = (uintptr_t)bootstack;
+    // 该进程是为了调度进程而创建的，所以其need_resched成员初始时为1。
     idleproc->need_resched = 1;
     set_proc_name(idleproc, "idle");
     nr_process ++;
