@@ -129,7 +129,7 @@ alloc_proc(void) {
         proc->flags = 0;
         //内核线程的名称初始化为空
         memset(proc->name, 0, PROC_NAME_LEN);
-        //lab5改善，
+        //lab5改善
         //对proc_struct::wait_state以及proc_struct::cptr/optr/yptr成员的初始化。
         proc->wait_state = 0;
         proc->cptr = proc->optr = proc->yptr = NULL;
@@ -432,7 +432,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         goto fork_out;
     }
     proc->parent = current;
-    // lab5:改善，确保当前进程的wait状态为空
+    // lab5改善，确保当前进程的wait状态为空
     //添加对当前进程等待状态的检查，
     assert(current->wait_state == 0);
     // 2. 调用setup_stack()函数为进程分配一个内核栈
@@ -453,7 +453,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     proc->pid = get_pid(); //创建一个id
     // 将线程放入使用hash组织的链表以及所有线程的链表中
     hash_proc(proc);//建立映射
-    // lab5:改善，设置进程间的关系
+    // lab5改善，设置进程间的关系
     set_links(proc);
     //lab5改善，下面这两个注释掉
     //list_add(&proc_list, &(proc->list_link));
