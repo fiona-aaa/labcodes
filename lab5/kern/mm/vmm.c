@@ -493,6 +493,40 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
         }
    }
 #endif
+    // try to find a pte, if pte's PT(Page Table) isn't existed, then create a PT.
+    // 获取当前发生缺页的虚拟页对应的PTE
+    if ((ptep = get_pte(mm->pgdir, addr, 1)) == NULL) {// is null
+        cprintf("get_pte in do_pgfault failed\n");
+        goto failed;
+    }
+    
+    if (*ptep == 0) { // if the phy addr isn't exist, then alloc a page & map the phy addr with logical addr
+        if (pgdir_alloc_page(mm->pgdir, addr, perm) == NULL) { // 分配物理页
+            cprintf("pgdir_alloc_page in do_pgfault failed\n");
+            goto failed;
+        }
+    }
+    else { // 页表项非空，尝试换入页面
+        // if this pte is a swap entry, then load data from disk to a page with phy addr
+        // and call page_insert to map the phy addr with logical addr
+        if(swap_init_ok) {
+            struct Page *page=NULL;
+            // 根据mm结构和addr地址，尝试将硬盘中的内容换入至page中
+            if ((ret = swap_in(mm, addr, &page)) != 0) {
+                cprintf("swap_in in do_pgfault failed\n");
+                goto failed;
+            }    
+            // 建立虚拟地址和物理地址之间的对应关系
+            page_insert(mm->pgdir, page, addr, perm); 
+            // 将此页面设置为可交换的
+            swap_map_swappable(mm, addr, page, 1);
+            page->pra_vaddr = addr;
+        }
+        else {
+            cprintf("no swap_init_ok but ptep is %x, failed\n",*ptep);
+            goto failed;
+        }
+   }
    ret = 0;
 failed:
     return ret;

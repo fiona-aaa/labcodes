@@ -363,7 +363,7 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
      *   PTE_W           0x002                   // page table/directory entry flags bit : Writeable
      *   PTE_U           0x004                   // page table/directory entry flags bit : User can access
      */
-#if 0
+/*#if 0
     pde_t *pdep = NULL;   // (1) find page directory entry
     if (0) {              // (2) check if entry is not present
                           // (3) check if creating is needed, then alloc page for page table
@@ -375,6 +375,26 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     }
     return NULL;          // (8) return page table entry
 #endif
+*/
+// find page directory entry
+    pde_t *pdep = &pgdir[PDX(la)]; 
+    // if entry is not present
+    if (!(*pdep & PTE_P)) {
+        // for page table
+        struct Page *page;
+        // create is 0 or allocation a page fails
+        if (!create || (page = alloc_page()) == NULL) {
+            return NULL;
+        }
+        set_page_ref(page, 1);// ref = 1
+        uintptr_t pa = page2pa(page);// physical addr
+        // clear page content
+        memset(KADDR(pa), 0, PGSIZE);
+        // set page directory entry's permission
+        *pdep = pa | PTE_U | PTE_W | PTE_P;
+    }
+    //页表项入口地址
+    return &((pte_t *)KADDR(PDE_ADDR(*pdep)))[PTX(la)];
 }
 
 //get_page - get related Page struct for linear address la using PDT pgdir
@@ -411,6 +431,7 @@ page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
      * DEFINEs:
      *   PTE_P           0x001                   // page table/directory entry flags bit : Present
      */
+     /*
 #if 0
     if (0) {                      //(1) check if this page table entry is present
         struct Page *page = NULL; //(2) find corresponding page to pte
@@ -420,6 +441,18 @@ page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
                                   //(6) flush tlb
     }
 #endif
+*/
+    //exits
+    if (*ptep & PTE_P) {
+        // (2) find corresponding page to pte
+        struct Page *page = pte2page(*ptep);
+        // (3) decrease page reference
+        if (page_ref_dec(page) == 0) {
+            free_page(page);
+        }
+        *ptep = 0;
+        tlb_invalidate(pgdir, la);
+    }
 }
 
 void
@@ -501,6 +534,14 @@ copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool share) {
          * (3) memory copy from src_kvaddr to dst_kvaddr, size is PGSIZE
          * (4) build the map of phy addr of  nage with the linear addr start
          */
+        void * kva_src = page2kva(page);
+        // 获取目标页面所在的虚拟地址
+        void * kva_dst = page2kva(npage);
+        // 页面数据复制
+        memcpy(kva_dst, kva_src, PGSIZE);
+        // 将该页面设置至对应的PTE中
+        ret = page_insert(to, npage, start, perm);
+        
         assert(ret == 0);
         }
         start += PGSIZE;

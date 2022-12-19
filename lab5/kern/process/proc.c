@@ -109,6 +109,30 @@ alloc_proc(void) {
      *       uint32_t wait_state;                        // waiting state
      *       struct proc_struct *cptr, *yptr, *optr;     // relations between processes
 	 */
+     //没有分配物理页，将线程状态初始为初始状态
+        proc->state = PROC_UNINIT; 
+        proc->pid = -1; 
+        proc->runs = 0; 
+        //内核栈位置，暂未分配，初始化为0
+        proc->kstack = 0; 
+        //不需要释放CPU，因为还没有分配
+        proc->need_resched = 0; 
+        proc->parent = NULL;
+        //mm，当前进程所管理的虚拟内存页，包括其所属的页目录项PDT
+        //内核线程用不到mm
+        proc->mm = NULL; 
+        //将context变量中的所有成员变量置为0
+        memset(&(proc->context), 0, sizeof(struct context));
+        proc->tf = NULL;
+        //内核线程，默认初始化为boot_cr3
+        proc->cr3 = boot_cr3; 
+        proc->flags = 0;
+        //内核线程的名称初始化为空
+        memset(proc->name, 0, PROC_NAME_LEN);
+        //lab5改善，
+        //对proc_struct::wait_state以及proc_struct::cptr/optr/yptr成员的初始化。
+        proc->wait_state = 0;
+        proc->cptr = proc->optr = proc->yptr = NULL;
     }
     return proc;
 }
@@ -403,7 +427,43 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 	*    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
 	*    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
     */
-	
+    // 1.调用alloc_proc()函数申请内存块，将子进程的父节点设置为当前进程
+    if ((proc = alloc_proc()) == NULL) {
+        goto fork_out;
+    }
+    proc->parent = current;
+    // lab5:改善，确保当前进程的wait状态为空
+    //添加对当前进程等待状态的检查，
+    assert(current->wait_state == 0);
+    // 2. 调用setup_stack()函数为进程分配一个内核栈
+    if (setup_kstack(proc) != 0) {
+        goto bad_fork_cleanup_proc;
+    }
+    // 3. 调用copy_mm()函数（proc.c253行）复制父进程的内存信息到子进程
+    if (copy_mm(clone_flags, proc) != 0) {
+        goto bad_fork_cleanup_kstack;
+    }
+    // 4. 调用copy_thread()函数复制父进程的中断帧和上下文信息
+    copy_thread(proc, stack, tf);
+
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    
+    // 5. 将新进程添加到进程的（hash）列表中
+    proc->pid = get_pid(); //创建一个id
+    // 将线程放入使用hash组织的链表以及所有线程的链表中
+    hash_proc(proc);//建立映射
+    // lab5:改善，设置进程间的关系
+    set_links(proc);
+    //lab5改善，下面这两个注释掉
+    //list_add(&proc_list, &(proc->list_link));
+   // nr_process ++;// 将全局线程的数目加1
+    
+    local_intr_restore(intr_flag);
+    // 6. 唤醒子进程
+    wakeup_proc(proc);
+    // 7. 返回子进程的pid
+    ret = proc->pid;	
 fork_out:
     return ret;
 
@@ -602,6 +662,11 @@ load_icode(unsigned char *binary, size_t size) {
      *          tf_eip should be the entry point of this binary program (elf->e_entry)
      *          tf_eflags should be set to enable computer to produce Interrupt
      */
+    tf->tf_cs = USER_CS;
+    tf->tf_ds = tf->tf_es = tf->tf_ss = USER_DS;
+    tf->tf_esp = USTACKTOP;
+    tf->tf_eip = elf->e_entry;
+    tf->tf_eflags = FL_IF;
     ret = 0;
 out:
     return ret;
