@@ -541,7 +541,6 @@ copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool share) {
         memcpy(kva_dst, kva_src, PGSIZE);
         // 将该页面设置至对应的PTE中
         ret = page_insert(to, npage, start, perm);
-        
         assert(ret == 0);
         }
         start += PGSIZE;
