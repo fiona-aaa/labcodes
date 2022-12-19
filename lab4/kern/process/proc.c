@@ -125,7 +125,7 @@ alloc_proc(void) {
     }
     return proc;
 }
-
+//context和tf有什么区别？
 // set_proc_name - set the name of proc
 char *
 set_proc_name(struct proc_struct *proc, const char *name) {
