@@ -10,16 +10,19 @@ wakeup_proc(struct proc_struct *proc) {
     proc->state = PROC_RUNNABLE;
 }
 //schedule函数会先清除调度标志，
-//并从当前进程在链表中的位置开始，遍历进程控制块，直到找出处于就绪状态的进程
+//并从当前进程在链表中的位置开始，遍历进程控制块，
+//直到找出处于就绪状态的进程
 void
 schedule(void) {
     bool intr_flag;//定义中断变量
     list_entry_t *le, *last;
     struct proc_struct *next = NULL;//下一进程
-    local_intr_save(intr_flag);//关闭中断
+    //关闭中断
+    local_intr_save(intr_flag);
     {
         current->need_resched = 0;
-        //last是否是idle进程(第一个创建的进程),如果是，则从表头开始搜索 ；否则获取下一链表
+        //last是否是idle进程(第一个创建的进程)
+        //如果是，则从表头开始搜索 ；否则获取下一链表
         last = (current == idleproc) ? &proc_list : &(current->list_link);
         le = last;
         //循环找到可调度的进程
@@ -39,7 +42,7 @@ schedule(void) {
         }
         //运行次数加一
         next->runs ++;
-        //运行新进程,
+        //运行新进程
         if (next != current) {
             proc_run(next);
         }
