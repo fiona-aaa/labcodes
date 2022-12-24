@@ -109,7 +109,7 @@ alloc_proc(void) {
      *       uint32_t wait_state;                        // waiting state
      *       struct proc_struct *cptr, *yptr, *optr;     // relations between processes
 	 */
-     //没有分配物理页，将线程状态初始为初始状态
+        //没有分配物理页，将线程状态初始为初始状态
         proc->state = PROC_UNINIT; 
         proc->pid = -1; 
         proc->runs = 0; 
@@ -130,7 +130,7 @@ alloc_proc(void) {
         //内核线程的名称初始化为空
         memset(proc->name, 0, PROC_NAME_LEN);
         //lab5改善
-        //对proc_struct::wait_state以及proc_struct::cptr/optr/yptr成员的初始化。
+        //对proc_struct::wait_state以及proc_struct::cptr/optr/yptr成员的初始化
         proc->wait_state = 0;
         proc->cptr = proc->optr = proc->yptr = NULL;
     }
@@ -432,7 +432,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         goto fork_out;
     }
     proc->parent = current;
-    // lab5改善，确保当前进程的wait状态为空
+    //lab5改善，确保当前进程的wait状态为空
     //添加对当前进程等待状态的检查，
     assert(current->wait_state == 0);
     // 2. 调用setup_stack()函数为进程分配一个内核栈
@@ -453,11 +453,11 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     proc->pid = get_pid(); //创建一个id
     // 将线程放入使用hash组织的链表以及所有线程的链表中
     hash_proc(proc);//建立映射
-    // lab5改善，设置进程间的关系
+    //lab5改善，设置进程间的关系
     set_links(proc);
     //lab5改善，下面这两个注释掉
     //list_add(&proc_list, &(proc->list_link));
-   // nr_process ++;// 将全局线程的数目加1
+    // nr_process ++;// 将全局线程的数目加1
     
     local_intr_restore(intr_flag);
     // 6. 唤醒子进程
